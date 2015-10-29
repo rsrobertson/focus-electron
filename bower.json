@@ -1,0 +1,29 @@
+{
+  "name": "focus-electron",
+  "description": "",
+  "main": "main.js",
+  "authors": [
+    "Rob Robertson <rsraloha@gmail.com>"
+  ],
+  "license": "MIT",
+  "moduleType": [],
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "/public/libs/",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.7",
+    "angular-route": "~1.4.7",
+    "jquery": "~2.1.4",
+    "angular-material": "~0.11.4",
+    "angular-messages": "~1.4.7",
+    "angular-animate": "~1.4.7",
+    "angular-aria": "~1.4.7"
+  }
+}
