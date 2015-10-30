@@ -57,7 +57,9 @@
 
     var service = {
       getTasks: getTasks,
-      createTask: createTask
+      createTask: createTask,
+      updateTask: updateTask,
+      deleteTask: deleteTask
     };
 
     return service;
@@ -69,11 +71,11 @@
         var deferred = $q.defer();
         db.all('SELECT * FROM tasks ORDER BY title', function(err, rows) {
           if(err !== null) {
-            console.log(err);
+            $log.log(err);
             deferred.reject(err);
           }
           else {
-            console.log(rows);
+            $log.log(rows);
             deferred.resolve(rows);
           }
         });
@@ -81,20 +83,35 @@
     }
 
     function getTask(id){
+        var deferred = $q.defer();
+        db.get('SELECT * FROM tasks where id = ? + ORDER BY title', [id], function(err, rows) {
+          if(err !== null) {
+            $log.log(err);
+            deferred.reject(err);
+          }
+          else {
+            $log.log(rows);
+            deferred.resolve(row);
+          }
+        });
+        return deferred.promise;
 
     }
 
     function createTask(task){
 
-     sqlRequest = "INSERT INTO 'tasks' (title,description,estimate) " +
-               "VALUES('task 1','task descr',3)";
+      var deferred = $q.defer();
 
-      db.run(sqlRequest, function(err) {
+      sqlRequest = "INSERT INTO tasks (title,description,estimate) VALUES (?,?,?)";
+
+      db.run(sqlRequest,[task.title,task.description,task.estimate], function(err) {
         if(err !== null) {
-          next(err);
+          $log.log(err);
+          deferred.reject(err);
         }
         else {
-          console.log('inserted');
+          deferred.resolve({result: "success"});
+          $log.log('inserted');
         }
       });
 
@@ -102,9 +119,38 @@
 
     function updateTask(task){
 
+      var deferred = $q.defer();
+      var sql = "Update tasks set title = ?, description = ?, estimate = ? where id = ?";
+       db.run(sql,[task.title,task.description,task.estimate,task.id],
+         function(err) {
+          if(err !== null) {
+            $log.log(err);
+            deferred.reject(err);
+          }
+          else {
+            deferred.resolve({result : 'success'});
+          }
+        });
+
+       return deferred.promise;
     }
 
-    function deleteTask(){
+    function deleteTask(id){
+      var deferred = $q.defer();
+
+
+       db.run("DELETE FROM tasks WHERE id = " + id,
+         function(err) {
+          if(err !== null) {
+            $log.log(err);
+            deferred.reject(err);
+          }
+          else {
+            deferred.resolve({result : 'success'});
+          }
+        });
+
+       return deferred.promise;
 
     }
 
@@ -145,9 +191,9 @@
   //timer controller
   angular.module('focus').controller('TaskCtrl',TaskCtrl);
 
-  TaskCtrl.$inject = ['$scope', '$log','taskService'];
+  TaskCtrl.$inject = ['$scope', '$log','taskService','$mdDialog'];
 
-  function TaskCtrl($scope,$log,taskService){
+  function TaskCtrl($scope,$log,taskService,$mdDialog){
 
     var self = this;
     self.tasks = null;
@@ -158,17 +204,54 @@
       });
     };
 
-    self.createTask = function(task){
-      taskService.createTask(task);
+    self.saveTask = function(task){
+      if(!task.id)
+        taskService.createTask(task);
+      else
+        taskService.updateTask(task);
+      self.getTasks();
+    };
+
+    self.deleteTask = function(task){
+      taskService.deleteTask(task.id);
+      self.getTasks();
+    };
+
+    self.showEdit = function(ev, task){
+      $mdDialog.show({
+        controller:DialogController,
+        templateUrl: 'dialog1.tmpl.html',
+        parent:angular.element(document.body),
+        targetEvent:ev,
+        clickOutsideToClose:true,
+        locals: {
+          task : task
+        }
+      }).then(function(task){
+        self.saveTask(task);
+      });
+
     };
 
     self.getTasks();
 
   }
 
+  function DialogController($scope, $mdDialog, task) {
+    $scope.task = task;
 
+    $scope.hide = function() {
+      $mdDialog.hide();
+    };
 
+    $scope.cancel = function() {
+      $mdDialog.cancel();
+    };
 
+    $scope.saveTask = function() {
+      $mdDialog.hide($scope.task);
+    };
+  }
 
 
 

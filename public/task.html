@@ -1,8 +1,51 @@
-  <md-content style="height:200px;">
-    <md-grid-list md-cols="3" md-row-height="25px" ng-repeat="task in tc.tasks">
+  <md-content style="width:600px;height:400px;">
+    <md-grid-list md-cols="5" md-row-height="25px" ng-repeat="task in tc.tasks">
       <md-grid-tile><h4>{{task.title}}</h4></md-grid-tile>
       <md-grid-tile><h4>{{task.description}}</h4></md-grid-tile>
       <md-grid-tile><h4>{{task.estimate}}</h4></md-grid-tile>
+      <md-grid-tile><md-button class="md-primary" ng-click="tc.showEdit($event,task)">Update</md-button></md-grid-tile>
+      <md-grid-tile><md-button class="md-primary" ng-click="tc.deleteTask(task)">Delete</md-button></md-grid-tile>
     </md-grid-list>
+    <div layout="row">
+      <md-button class="md-raised md-primary" ng-click="tc.showEdit($event)">New</md-button>
+    </div>
   </md-content>
-  <md-button class="md-raised md-primary" ng-click="tc.createTask()">Create</md-button>
+
+
+<script type="text/ng-template" id="dialog1.tmpl.html"><md-dialog aria-label="Mango (Fruit)"  ng-cloak>
+  <form>
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Edit Task</h2>
+      <span flex></span>
+      <md-button class="md-icon-button" ng-click="cancel()">
+        <md-icon class="material-icons" md-font-set="material-icons" aria-label="Close dialog">close</md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+  <md-dialog-content style="max-width:800px;max-height:810px; ">
+    <div class="md-dialog-content">
+        <md-input-container>
+          <label>Title</label>
+          <input name="title" ng-required ng-model="task.title">
+        </md-input-container>
+        <md-input-container>
+          <label>Description</label>
+          <input name="description" ng-model="task.description">
+        </md-input-container>
+        <md-input-container>
+          <label>Estimate</label>
+          <input name="estimate" ng-model="task.estimate">
+        </md-input-container>
+    </div>
+  </md-dialog-content>
+
+  <div class="md-actions" layout="row">
+    <span flex></span>
+    <md-button ng-click="saveTask()" >
+      Save Task
+    </md-button>
+  </div>
+  </form>
+</md-dialog>
+</script>
