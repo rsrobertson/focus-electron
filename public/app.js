@@ -40,12 +40,27 @@
     $routeProvider.when('/',{
       templateUrl: 'task.html',
       controller: 'TaskCtrl',
-      controllerAs: 'tc'
+      controllerAs: 'tc',
+    });
+
+    $routeProvider.when('/timer/:id',{
+      templateUrl: 'timer.html',
+      controller: 'TimerCtrl',
+      controllerAs: 'vm',
+      resolve: {
+        task : function($route, taskService){
+          return taskService.getTask($route.current.params.id);
+        }
+      }
     });
 
     $routeProvider.otherwise({redirectTo:'/'});
 
-    $mdThemingProvider.theme('default').dark();
+    $mdThemingProvider.theme('default')
+      .primaryPalette('green')
+      .accentPalette('lime')
+      .warnPalette('pink')
+      .dark();
   }
 
   //task service
@@ -57,6 +72,7 @@
 
     var service = {
       getTasks: getTasks,
+      getTask: getTask,
       createTask: createTask,
       updateTask: updateTask,
       deleteTask: deleteTask
@@ -84,14 +100,14 @@
 
     function getTask(id){
         var deferred = $q.defer();
-        db.get('SELECT * FROM tasks where id = ? + ORDER BY title', [id], function(err, rows) {
+        db.get('SELECT * FROM tasks where id = ?', [id], function(err, rows) {
           if(err !== null) {
             $log.log(err);
             deferred.reject(err);
           }
           else {
             $log.log(rows);
-            deferred.resolve(row);
+            deferred.resolve(rows);
           }
         });
         return deferred.promise;
@@ -159,41 +175,65 @@
   //timer controller
   angular.module('focus').controller('TimerCtrl',TimerCtrl);
 
-  TimerCtrl.$inject = ['$scope', '$interval','$log'];
+  //task dependency is rosolved during routing
+  TimerCtrl.$inject = ['$scope', '$interval','$log','$location','$routeParams','taskService','task'];
 
-  function TimerCtrl($scope,$interval,$log){
-    vm = this;
-    vm.timeoutPromise = null;
+  function TimerCtrl($scope,$interval,$log,$location,$routeParams,taskService, task){
+    self = this;
+    self.timeoutPromise = null;
+    self.task = {};
     var log = $log;
 
-    vm.start = function(){
+    activate();
+
+
+    function activate(){
+      return taskService.getTask($routeParams.id).then(function(data){
+          self.task = data;
+          return data;
+      });
+
+    }
+
+    $log.log(task);
+
+    self.showTasks = function(){
+      $location.url("/");
+    };
+
+
+    self.loadTask = function(){
+      taskService.getTask();
+    };
+
+    self.start = function(){
       $log.log('start');
-      vm.timeoutPromise = $interval(vm.updateDisplay, 1000);
+      self.timeoutPromise = $interval(self.updateDisplay, 1000);
     };
 
-    vm.stop = function(){
+    self.stop = function(){
       $log.log('stop');
-      vm.timeoutPromise = $interval.cancel(vm.timeoutPromise);
+      self.timeoutPromise = $interval.cancel(self.timeoutPromise);
     };
 
-    vm.reset = function(){
+    self.reset = function(){
       $log.log('reset');
-      vm.elapsed = 0;
+      self.elapsed = 0;
     };
 
-    vm.elapsed = 0;
-    vm.updateDisplay = function(){
-      vm.elapsed++;
-      $log.log(vm.elapsed);
+    self.elapsed = 0;
+    self.updateDisplay = function(){
+      self.elapsed++;
+      $log.log(self.elapsed);
     };
   }
 
   //timer controller
   angular.module('focus').controller('TaskCtrl',TaskCtrl);
 
-  TaskCtrl.$inject = ['$scope', '$log','taskService','$mdDialog'];
+  TaskCtrl.$inject = ['$scope', '$log','taskService','$mdDialog', '$location'];
 
-  function TaskCtrl($scope,$log,taskService,$mdDialog){
+  function TaskCtrl($scope,$log,taskService,$mdDialog, $location){
 
     var self = this;
     self.tasks = null;
@@ -217,19 +257,20 @@
       self.getTasks();
     };
 
-    self.showEdit = function(ev, task){
-      $mdDialog.show({
-        controller:DialogController,
-        templateUrl: 'dialog1.tmpl.html',
-        parent:angular.element(document.body),
-        targetEvent:ev,
-        clickOutsideToClose:true,
-        locals: {
-          task : task
-        }
-      }).then(function(task){
-        self.saveTask(task);
-      });
+    self.showTimer= function(ev, task){
+      $location.url("/timer/" + task.id);
+      // $mdDialog.show({
+      //   controller:DialogController,
+      //   templateUrl: 'dialog1.tmpl.html',
+      //   parent:angular.element(document.body),
+      //   targetEvent:ev,
+      //   clickOutsideToClose:true,
+      //   locals: {
+      //     task : task
+      //   }
+      // }).then(function(task){
+      //   self.saveTask(task);
+      // });
 
     };
 

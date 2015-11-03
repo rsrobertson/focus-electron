@@ -1,4 +1,38 @@
-  <md-content style="width:600px;height:400px;">
+<!-- <div style="display:flex;height:100%;flex-flow:column;width:50%;background:blue">
+  <h2>Task Content</h2>
+  <p>test</p>
+</div>
+ -->
+<!-- <div flex layout="column" style="height:100%;background:blue;">
+  <h2>Task Content</h2>
+  <p>test</p>
+</div>
+ -->
+
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <md-button class="md-icon-button">
+        <md-icon class="materail-icons" md-font-set="material-icons">menu</md-icon>
+      </md-button>
+      <h3>
+       Tasks
+      </h3>
+    </div>
+  </md-toolbar>
+  <md-content flex style="height:100%;" layout-padding >
+      <md-card layout-padding layout-margin ng-repeat="task in tc.tasks">
+        <md-card-content ng-click="tc.showTimer($event,task)">
+          <h4>{{task.title}}</h4>
+          <p>{{task.description}}</p>
+        </md-card-content>
+      </md-card>
+      <div class="md-actions" layout="row" layout-align="end-center">
+        <md-button ng-click="tc.showEdit($event)">Edit</md-button>
+        <md-button ng-click="tc.deleteTask(task)">Delete</md-button>
+      </div>
+  </md-content>
+
+<!--   <md-content style="width:600px;height:400px;">
     <md-grid-list md-cols="5" md-row-height="25px" ng-repeat="task in tc.tasks">
       <md-grid-tile><h4>{{task.title}}</h4></md-grid-tile>
       <md-grid-tile><h4>{{task.description}}</h4></md-grid-tile>
@@ -11,7 +45,7 @@
     </div>
   </md-content>
 
-
+ -->
 <script type="text/ng-template" id="dialog1.tmpl.html"><md-dialog aria-label="Mango (Fruit)"  ng-cloak>
   <form>
   <md-toolbar>
